@@ -1,0 +1,55 @@
+"use client";
+import * as THREE from "three";
+import { useEffect, useRef, useState } from "react";
+const BACKGROUND_COLOR = 0x030507;
+export default function InteractiveCyberBackground() {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const check = () => setIsMobile(window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768);
+    check();
+    const mq = window.matchMedia("(pointer: coarse)"); mq.addEventListener("change", check);
+    return () => mq.removeEventListener("change", check);
+  }, []);
+  useEffect(() => {
+    const container = containerRef.current; if (!container) return;
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.z = 50;
+    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    renderer.setSize(container.clientWidth, container.clientHeight);
+    renderer.setClearColor(BACKGROUND_COLOR, 0);
+    container.appendChild(renderer.domElement);
+    const clock = new THREE.Clock();
+    const mouse = new THREE.Vector2();
+    const mouseWorld = new THREE.Vector3();
+    const count = isMobile ? 500 : 2000;
+    const pos = new Float32Array(count * 3);
+    const home = new Float32Array(count * 3);
+    const vel = new Float32Array(count * 3);
+    const col = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const i3 = i * 3;
+      pos[i3] = (Math.random() - 0.5) * 100; pos[i3+1] = (Math.random() - 0.5) * 100; pos[i3+2] = (Math.random() - 0.5) * 50;
+      home[i3] = pos[i3]; home[i3+1] = pos[i3+1]; home[i3+2] = pos[i3+2];
+      vel[i3] = (Math.random() - 0.5) * 0.1; vel[i3+1] = (Math.random() - 0.5) * 0.1; vel[i3+2] = (Math.random() - 0.5) * 0.1;
+      const c = new THREE.Color(0x00ff66); col[i3]=c.r; col[i3+1]=c.g; col[i3+2]=c.b;
+    }
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute("position", new (THREE as any).BufferAttribute(pos, 3));
+    geo.setAttribute("color", new (THREE as any).BufferAttribute(col, 3));
+    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ size: 1.2, vertexColors: true, transparent: true, opacity: 0.8 }));
+    scene.add(pts);
+    const onMove = (e: MouseEvent) => { const r = container.getBoundingClientRect(); mouse.x = ((e.clientX - r.left)/r.width)*2-1; mouse.y = -((e.clientY - r.top)/r.height)*2+1; };
+    const onTouch = (e: TouchEvent) => { if (e.touches.length===1) { const t=e.touches[0]; const r=container.getBoundingClientRect(); mouse.x=((t.clientX-r.left)/r.width)*2-1; mouse.y=-((t.clientY-r.top)/r.height)*2+1; } };
+    window.addEventListener("mousemove", onMove, { passive: true });
+    window.addEventListener("touchmove", onTouch, { passive: true });
+    let frame = 0;
+    const animate = () => { frame = requestAnimationFrame(animate); const d = clock.getDelta(); mouseWorld.set(mouse.x*50, mouse.y*50, 0); const pAttr = geo.attributes.position as (THREE as any).BufferAttribute; const cAttr = geo.attributes.color as (THREE as any).BufferAttribute; for (let i=0;i<count;i++){ const i3=i*3; let vx=vel[i3], vy=vel[i3+1], vz=vel[i3+2]; vx += (home[i3]-pos[i3])*0.05; vy += (home[i3+1]-pos[i3+1])*0.05; vz += (home[i3+2]-pos[i3+2])*0.05; const dx=pos[i3]-mouseWorld.x, dy=pos[i3+1]-mouseWorld.y, dz=pos[i3+2]-mouseWorld.z; const dist=Math.sqrt(dx*dx+dy*dy+dz*dz); if (dist<20 && dist>0.1){ const rep=15*(1-dist/20)/dist; vx+=dx*rep; vy+=dy*rep; vz+=dz*rep; const b=Math.max(0.3,1-dist/20); cAttr.setXYZ(i3,b,b,b); } else { cAttr.setXYZ(i3,0.3,0.6,0.3); } vx*=0.92; vy*=0.92; vz*=0.92; vel[i3]=vx; vel[i3+1]=vy; vel[i3+2]=vz; pos[i3]+=vx*d*60; pos[i3+1]+=vy*d*60; pos[i3+2]+=vz*d*60; } pAttr.needsUpdate=true; cAttr.needsUpdate=true; renderer.render(scene, camera); };
+    animate();
+    const resize = () => { if (container && camera && renderer) { const w=container.clientWidth, h=container.clientHeight; camera.aspect=w/h; camera.updateProjectionMatrix(); renderer.setSize(w,h); } };
+    window.addEventListener("resize", resize);
+    return () => { cancelAnimationFrame(frame); window.removeEventListener("mousemove", onMove); window.removeEventListener("touchmove", onTouch); window.removeEventListener("resize", resize); renderer.dispose(); scene.clear(); };
+  }, [isMobile]);
+  return <div ref={containerRef} className="fixed inset-0 z-[-20]" aria-hidden="true" />;
+}

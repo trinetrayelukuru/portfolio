@@ -16,6 +16,34 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+## GitHub contribution calendar
+
+The contribution heatmap is loaded server-side from GitHub GraphQL for
+`trinetrayelukuru`. Copy `.env.example` to `.env.local` (without overwriting
+any existing `.env.local`) and set:
+
+```bash
+GITHUB_TOKEN=your_github_token_here
+```
+
+`GITHUB_TOKEN` is intentionally server-only. Do not use a `NEXT_PUBLIC_`
+prefix, hard-code a token, or commit `.env.local`. Use the smallest read-only
+token GitHub accepts for public profile/contribution data; private repository
+access is not required by this portfolio. Restart `npm run dev` after changing
+the environment.
+
+The server endpoint is `GET /api/github/contributions`. It queries
+`contributionsCollection.contributionCalendar` and caches the upstream result
+for five minutes. Missing or invalid configuration is returned as an explicit
+error instead of an empty or fabricated calendar.
+
+## Checks
+
+```bash
+npx tsc --noEmit
+npm run build
+```
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

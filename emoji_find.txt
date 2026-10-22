@@ -1,0 +1,8 @@
+src/components/GitHubActivity.tsx 13 char U+2191 snippet:  PushEvent: "↑",
+src/components/GitHubActivity.tsx 15 char U+2212 snippet:  DeleteEvent: "−",
+src/components/GitHubActivity.tsx 16 char U+2442 snippet:  PullRequestEvent: "⑂",
+src/components/GitHubActivity.tsx 17 char U+25CE snippet:  IssuesEvent: "◎",
+src/components/GitHubActivity.tsx 50 char U+2442 snippet:  ForkEvent: "⑂",
+src/components/GitHubActivity.tsx 51 char U+2605 snippet:  WatchEvent: "★",
+src/components/GitHubActivity.tsx 52 char U+25C9 snippet:  PublicEvent: "◉",
+src/components/GitHubActivity.tsx 56 char U+203A snippet:  return TYPE_ICONS[type] ?? "›";

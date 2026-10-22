@@ -1,26 +1,415 @@
 @import "tailwindcss";
 
+/* ============================
+   CYBERPUNK DARK FOUNDATION
+   ============================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-deep: #030507;
+  --bg-charcoal: #05070A;
+  --bg-dark-green: #07100D;
+  --bg-dark-blue: #0A0A0F;
+  --surface-1: #0B1110;
+  --surface-2: #0D1513;
+  --surface-3: #101418;
+  --text-primary: #F5F7F7;
+  --text-secondary: #A7B0B0;
+  /* Accessible dim/secondary text (WCAG AA verified):
+     6.16:1 on --bg-deep #030507, 5.53:1 on --surface-2 #0B1713,
+     5.59:1 on #0D1513, 5.75:1 on #0B1110. Use instead of
+     #A7B0B0 at reduced opacity (which fell to ~3.8:1 at 60%). */
+  --text-dim: #868F8F;
+  --accent-green: #00FF66;
+  --accent-cyan: #00E5FF;
+  --accent-purple: #7C3AED;
+  --accent-blue: #3B82F6;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: var(--bg-deep);
+  --color-foreground: var(--text-primary);
+  --color-dim: var(--text-dim);
+  --font-sans: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: linear-gradient(180deg, var(--bg-deep) 0%, var(--bg-charcoal) 40%, var(--bg-dark-green) 100%);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  line-height: 1.65;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Subtle scanline overlay — very faint */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255,255,255,0.015) 0px,
+    rgba(255,255,255,0.015) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  opacity: 0.35;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-charcoal); }
+::-webkit-scrollbar-thumb { background: rgba(124,58,237,0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(124,58,237,0.6); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+  html { scroll-behavior: auto !important; }
+}
+
+@keyframes float { from { transform: translateY(0); } to { transform: translateY(-10px); } }
+
+/* ============================
+   CURSOR-REACTIVE BACKGROUND
+   A single fixed decorative layer behind the content.
+   Moving layers are transform/opacity only (composited); there are no
+   canvas loops, filters or per-frame React renders.
+   ============================ */
+
+.fx-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-color: var(--bg-deep);
+  /* isolation keeps the background in its own paint layer */
+  isolation: isolate;
+}
+
+/* Explicit stacking contract: decorative paint can never cover page content. */
+.page-content {
+  position: relative;
+  z-index: 1;
+}
+
+.fx-bg-base {
+  background:
+    radial-gradient(1100px 720px at 14% 4%, rgba(0, 255, 102, 0.09), transparent 62%),
+    radial-gradient(980px 700px at 88% 68%, rgba(0, 229, 255, 0.075), transparent 64%),
+    radial-gradient(820px 620px at 48% 106%, rgba(124, 58, 237, 0.07), transparent 66%),
+    linear-gradient(180deg, #030507 0%, #050806 46%, #07100D 100%);
+}
+
+.fx-bg-grid {
+  background-image:
+    linear-gradient(rgba(0, 229, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 229, 255, 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at 50% 35%, black 0%, transparent 78%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 35%, black 0%, transparent 78%);
+  animation: fx-grid-drift 32s linear infinite;
+  will-change: transform;
+  opacity: 0.8;
+}
+
+@keyframes fx-grid-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-64px, -64px, 0); }
+}
+
+.fx-bg-ambient {
+  width: 76vmax;
+  height: 76vmax;
+  margin-left: -38vmax;
+  margin-top: -38vmax;
+  will-change: transform;
+  pointer-events: none;
+}
+
+.fx-bg-ambient--green {
+  background: radial-gradient(
+    circle closest-side,
+    rgba(0, 255, 102, 0.075),
+    rgba(0, 255, 102, 0.025) 42%,
+    transparent 72%
+  );
+  animation: fx-ambient-green 28s ease-in-out infinite alternate;
+}
+
+.fx-bg-ambient--cyan {
+  width: 52vmax;
+  height: 52vmax;
+  margin-left: -26vmax;
+  margin-top: -26vmax;
+  background: radial-gradient(
+    circle closest-side,
+    rgba(0, 229, 255, 0.06),
+    rgba(0, 229, 255, 0.018) 44%,
+    transparent 74%
+  );
+  animation: fx-ambient-cyan 36s ease-in-out infinite alternate;
+}
+
+@keyframes fx-ambient-green {
+  from { transform: translate3d(-12vw, -8vh, 0) scale(0.98); }
+  to { transform: translate3d(18vw, 17vh, 0) scale(1.04); }
+}
+
+@keyframes fx-ambient-cyan {
+  from { transform: translate3d(70vw, 20vh, 0) scale(0.95); }
+  to { transform: translate3d(42vw, 72vh, 0) scale(1.04); }
+}
+
+.fx-bg-glow {
+  width: 64vmax;
+  height: 64vmax;
+  margin-left: -32vmax;
+  margin-top: -32vmax;
+  transform: translate3d(var(--pointer-x, 50vw), var(--pointer-y, 42vh), 0);
+  transition: transform 700ms cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+  opacity: var(--glow-intensity, 0.72);
+}
+
+.fx-bg-glow--green {
+  background: radial-gradient(
+    circle closest-side,
+    rgba(0, 255, 102, 0.16) 0%,
+    rgba(0, 255, 102, 0.08) 34%,
+    rgba(0, 229, 255, 0.04) 58%,
+    transparent 74%
+  );
+}
+
+.fx-bg-glow--cyan {
+  width: 30vmax;
+  height: 30vmax;
+  margin-left: -15vmax;
+  margin-top: -15vmax;
+  background: radial-gradient(
+    circle closest-side,
+    rgba(0, 229, 255, 0.12) 0%,
+    rgba(0, 229, 255, 0.05) 46%,
+    transparent 72%
+  );
+  transition-duration: 260ms;
+}
+
+.fx-bg-scanlines {
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 255, 102, 0.045) 0px,
+    rgba(0, 255, 102, 0.045) 1px,
+    transparent 1px,
+    transparent 4px
+  );
+  opacity: 0.28;
+}
+
+/* Touch / no-hover devices: no cursor trail, lighter composition */
+@media (hover: none), (pointer: coarse) {
+  .fx-bg-glow {
+    transition: none;
+    transform: translate3d(50vw, 38vh, 0);
+  }
+  .fx-bg-glow--cyan {
+    transform: translate3d(50vw, 44vh, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-bg-glow {
+    transition: none;
+    transform: translate3d(50vw, 38vh, 0);
+  }
+  .fx-bg-glow--cyan {
+    transform: translate3d(50vw, 44vh, 0);
+  }
+  .fx-bg-grid,
+  .fx-bg-ambient { animation: none; }
+}
+
+/* ============================
+   FX LEVELS (full | subtle | off)
+   Toggled from the nav bar; persisted in localStorage.
+   Only decorative layers respond — page content is never hidden.
+   ============================ */
+
+/* fx-soft: kept but dimmed in subtle, removed when off */
+[data-fx="off"] .fx-soft { display: none !important; }
+[data-fx="subtle"] .fx-soft { opacity: 0.4 !important; }
+
+/* Cursor background intensity */
+[data-fx="subtle"] .fx-bg-glow { opacity: 0.5; }
+[data-fx="subtle"] .fx-bg-grid { opacity: 0.55; }
+[data-fx="subtle"] .fx-bg-ambient { opacity: 0.55; }
+[data-fx="off"] .fx-bg-glow,
+[data-fx="off"] .fx-bg-grid,
+[data-fx="off"] .fx-bg-ambient,
+[data-fx="off"] .fx-optional { display: none !important; }
+
+/* subtle: strip decorative layers down */
+[data-fx="subtle"] .fx-decorative { display: none !important; }
+[data-fx="subtle"] body::before { opacity: 0.12; }
+[data-fx="subtle"] .fx-anim { animation: none !important; }
+
+/* off: kill every heavy / decorative layer */
+[data-fx="off"] .fx-decorative { display: none !important; }
+[data-fx="off"] body::before { display: none !important; }
+[data-fx="off"] .fx-anim { animation: none !important; }
+[data-fx="off"] * { transition-duration: 0.01ms !important; }
+[data-fx="off"] .fx-bg { transition: none !important; }
+
+/* ============================
+   REUSABLE ANIMATIONS
+   ============================ */
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0, 255, 102, 0.5); }
+  50% { opacity: 0.6; box-shadow: 0 0 0 6px rgba(0, 255, 102, 0); }
+}
+
+@keyframes scanline-sweep {
+  0% { transform: translateY(-10vh); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateY(110vh); opacity: 0; }
+}
+
+@keyframes border-flow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes grid-drift {
+  from { background-position: 0 0; }
+  to { background-position: 60px 60px; }
+}
+
+/* ============================
+   ENTRANCE MOTION (content-first)
+   `.reveal` is visible by default. Motion only adds a transform; opacity is
+   intentionally never used as a visibility gate.
+   ============================ */
+
+.reveal[data-reveal="armed"] {
+  /* Kept as a compatibility selector for older hot-reloaded markup. Never
+     hide content while motion is being prepared. */
+  opacity: 1;
+  transform: none;
+}
+
+.reveal[data-reveal="play"] {
+  animation: reveal-up var(--reveal-duration, 0.6s) cubic-bezier(0.22, 1, 0.36, 1)
+    var(--reveal-delay, 0s) both;
+}
+
+@keyframes reveal-up {
+  from { opacity: 1; transform: translate3d(0, var(--reveal-y, 18px), 0); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Hero entrance — applied in the server-rendered markup and driven by CSS only,
+   so it plays even if the client bundle never loads. */
+.hero-in {
+  animation: hero-in 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes hero-in {
+  from { opacity: 1; transform: translate3d(0, 18px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal[data-reveal="play"],
+  .hero-in { animation: none; }
+}
+
+/* FX OFF is a reliable visual baseline, not a content mode. */
+[data-fx="off"] .hero-in,
+[data-fx="off"] .reveal[data-reveal="play"] {
+  animation: none !important;
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+@keyframes glitch-shift {
+  0%, 100% { clip-path: inset(0 0 0 0); transform: translate(0); }
+  20% { clip-path: inset(20% 0 60% 0); transform: translate(-3px, 1px); }
+  40% { clip-path: inset(60% 0 10% 0); transform: translate(3px, -1px); }
+  60% { clip-path: inset(40% 0 40% 0); transform: translate(-2px, 0); }
+  80% { clip-path: inset(10% 0 70% 0); transform: translate(2px, 1px); }
+}
+
+@keyframes float-soft {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes node-drift {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(5px, -7px); }
+  66% { transform: translate(-6px, 5px); }
+}
+
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  92% { opacity: 1; }
+  93% { opacity: 0.55; }
+  94% { opacity: 1; }
+  96% { opacity: 0.7; }
+  97% { opacity: 1; }
+}
+
+@keyframes letter-drift {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-8px) rotate(2deg); }
+}
+
+.animate-marquee { animation: marquee 38s linear infinite; }
+.animate-marquee-fast { animation: marquee 22s linear infinite; }
+.animate-scan-sweep { animation: scanline-sweep 7s linear infinite; }
+.animate-grid-drift { animation: grid-drift 14s linear infinite; }
+.animate-float-soft { animation: float-soft 6s ease-in-out infinite; }
+.animate-glitch { animation: glitch-shift 2.8s steps(1) infinite; }
+.animate-node-drift { animation: node-drift 5s ease-in-out infinite; }
+.animate-flicker { animation: flicker 4.5s linear infinite; }
+.animate-letter-drift { animation: letter-drift 7s ease-in-out infinite; }
+
+.border-flow {
+  background: linear-gradient(90deg, #00FF66, #00E5FF, #7C3AED, #00FF66);
+  background-size: 300% 100%;
+  animation: border-flow 6s ease infinite;
+}
+
+/* Horizontal mask used by the tech marquee */
+.mask-fade-x {
+  mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+  -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+}
+
+/* Selection + focus polish */
+::selection { background: rgba(0, 255, 102, 0.25); color: #F5F7F7; }
+:focus-visible { outline: 2px solid #00E5FF; outline-offset: 2px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee, .animate-marquee-fast, .animate-scan-sweep,
+  .animate-grid-drift, .animate-float-soft, .animate-glitch, .border-flow,
+  .animate-node-drift, .animate-flicker, .animate-letter-drift {
+    animation: none !important;
+  }
 }
