@@ -1,10 +1,26 @@
 "use client";
 
-import Image from "next/image";
 import { EDUCATION, PROFILE } from "../lib/constants";
 import HUDPanel from "./HUDPanel";
 import SectionHeader from "./SectionHeader";
 import Reveal from "./Reveal";
+import HalftoneReveal from "./HalftoneReveal";
+import LogoLoop from "./LogoLoop";
+import {
+  SiArduino,
+  SiCplusplus,
+  SiDocker,
+  SiFigma,
+  SiGithub,
+  SiJavascript,
+  SiNextdotjs,
+  SiNodedotjs,
+  SiPython,
+  SiReact,
+  SiSolidity,
+  SiTailwindcss,
+  SiTypescript,
+} from "react-icons/si";
 
 const CONTACT_LINKS = [
   { label: "GITHUB", href: PROFILE.github, accent: "#00FF66", external: true },
@@ -24,23 +40,76 @@ export default function AboutNew() {
           sub="Computer Science (IoT) graduate from VIT Vellore building AI applications, web products and interfaces."
         />
 
+        <Reveal className="mb-10" y={14}>
+          <div className="flex h-[250px] items-center justify-center overflow-hidden px-2 sm:h-[300px] sm:px-5">
+            <LogoLoop
+              logos={[
+                { node: <SiPython />, title: "Python", hoverColor: "#FFD43B" },
+                { node: <SiReact />, title: "React", hoverColor: "#61DAFB" },
+                { node: <SiNextdotjs />, title: "Next.js", hoverColor: "#F5F7F7" },
+                { node: <SiTypescript />, title: "TypeScript", hoverColor: "#3178C6" },
+                { node: <SiTailwindcss />, title: "Tailwind", hoverColor: "#38BDF8" },
+                { node: <SiNodedotjs />, title: "Node.js", hoverColor: "#68A063" },
+                { node: <SiFigma />, title: "Figma", hoverColor: "#F24E1E" },
+                { node: <SiArduino />, title: "Arduino", hoverColor: "#00979D" },
+                { node: <SiJavascript />, title: "JavaScript", hoverColor: "#F7DF1E" },
+                { node: <SiGithub />, title: "GitHub", hoverColor: "#F5F7F7" },
+                { node: <SiDocker />, title: "Docker", hoverColor: "#2496ED" },
+                { node: <SiSolidity />, title: "Solidity", hoverColor: "#A6A6A6" },
+                { node: <SiCplusplus />, title: "C++", hoverColor: "#659AD2" },
+              ]}
+              speed={80}
+              direction="left"
+              logoHeight={44}
+              gap={56}
+              hoverSpeed={0}
+              scaleOnHover
+              layout="orbit"
+              bend={0.6}
+              focus={0.45}
+              tiltX={-4}
+              tiltY={-48}
+              labels="hover"
+              fadeOut
+              intro
+              ariaLabel="Technology toolkit orbit"
+            />
+          </div>
+        </Reveal>
+
         {/* Identity banner */}
         <Reveal className="mb-10" y={16}>
           <div className="relative overflow-hidden rounded-2xl border border-[#00FF66]/20 bg-[#05070A]">
-            <div className="relative aspect-[16/7] w-full sm:aspect-[16/6]">
-              <Image
-                 src="/profile-current.jpeg"
-                alt={`${PROFILE.fullName} — profile photo`}
-                fill
-                sizes="(max-width: 1024px) 100vw, 1100px"
-                className="object-cover object-center opacity-90"
+            <div
+              className="relative aspect-[16/7] w-full sm:aspect-[16/6]"
+              role="img"
+              aria-label={`${PROFILE.fullName} — profile photo revealed through a halftone print effect`}
+            >
+              <HalftoneReveal
+                src="/profile-current.jpeg"
+                fit="cover"
+                mode="duotone"
+                shape="dot"
+                cellSize={5}
+                angle={45}
+                inkColor="#00FF66"
+                accentColor="#39FF88"
+                paperColor="#030507"
+                contrast={1.15}
+                revealRadius={150}
+                softness={0.7}
+                linger={1}
+                className="absolute inset-0"
               />
               <div
                 aria-hidden="true"
-                className="absolute inset-0 bg-gradient-to-t from-[#030507] via-[#030507]/55 to-transparent"
+                className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#030507] via-[#030507]/55 to-transparent"
               />
-              <div aria-hidden="true" className="absolute inset-0 fx-bg-scanlines opacity-20" />
-              <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
+              <div aria-hidden="true" className="pointer-events-none absolute inset-0 fx-bg-scanlines opacity-20" />
+              <div className="pointer-events-none absolute right-4 top-4 rounded border border-[#00E5FF]/35 bg-[#030507]/70 px-2 py-1 font-mono text-[9px] tracking-[0.18em] text-[#00E5FF]">
+                MOVE TO REVEAL
+              </div>
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 p-5 sm:p-7">
                 <div className="font-mono text-[11px] tracking-[0.3em] text-[#00E5FF] uppercase">
                   {PROFILE.title}
                 </div>

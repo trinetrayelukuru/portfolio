@@ -4,8 +4,9 @@ import { useFxLevel } from "@/lib/fx";
 import SplashCursor from "@/components/SplashCursor";
 
 /**
- * The only mount point for the WebGL cursor effect. Keeping it in the root
- * layout means route changes never create a second canvas or simulation loop.
+ * The fluid cursor effect is reserved for SUBTLE mode. FULL mode uses the
+ * GridScan WebGL background plus the CSS cursor glow so the two large WebGL
+ * canvases do not compete for the browser's context budget.
  */
 export default function SplashCursorLayer() {
   const level = useFxLevel();
@@ -30,7 +31,7 @@ export default function SplashCursorLayer() {
       contained={false}
       theme="dark"
       zIndex={0}
-      enabled={level !== "off"}
+      enabled={level === "subtle"}
     />
   );
 }

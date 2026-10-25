@@ -2,13 +2,15 @@
 
 import { useEffect, useRef } from "react";
 import { useFxLevel } from "../lib/fx";
+import GridScan from "./GridScan";
 
 /**
  * Cursor-reactive ambient background.
  *
  * Everything decorative lives in ONE fixed, pointer-events-none layer behind
  * the content (`z-0` here; page content sits in a `relative z-10` wrapper).
- * There are no canvases, particle arrays, or per-frame React renders:
+ * The classic field stays CSS-only; FULL FX adds an isolated GridScan canvas
+ * without changing page content or causing per-frame React renders:
  *
  *  • two soft radial gradients are moved with `translate3d` to follow the
  *    pointer, each with a different CSS transition so they trail the cursor;
@@ -110,22 +112,47 @@ export default function CursorReactiveBg() {
       data-fx-bg={level}
       className="fx-bg pointer-events-none fixed inset-0 z-0 overflow-hidden"
     >
+      {level === "full" && (
+        <div className="fx-gridscan-layer fx-full-only absolute inset-0">
+          <div className="fx-gridscan-fallback absolute inset-0" aria-hidden="true" />
+          <GridScan
+            linesColor="#11B910"
+            scanColor="#8EE700"
+            cells={8}
+            depth={4.4}
+            depthFade={0.3}
+            parallax={1.1}
+            shading={0.78}
+            reflection={0.59}
+            scanDirection="forward"
+            scanDuration={2.4}
+            scanDelay={1.6}
+            clickEffect="ping"
+            lineThickness={1.2}
+            scanWidth={2.7}
+            trail={0.72}
+            glow={1.5}
+            className="absolute inset-0 z-[1]"
+          />
+        </div>
+      )}
+
       {/* Static base field — painted once */}
-      <div className="fx-bg-base absolute inset-0" />
+      <div className="fx-classic-background fx-bg-base absolute inset-0" />
 
       {/* Slowly drifting grid (transform-only animation) */}
-      <div className="fx-bg-grid fx-anim absolute -inset-16" />
+      <div className="fx-classic-background fx-bg-grid fx-anim absolute -inset-16" />
 
       {/* Independent ambient fields keep the atmosphere alive at rest. */}
-      <div className="fx-bg-ambient fx-bg-ambient--green fx-anim absolute left-0 top-0" />
-      <div className="fx-bg-ambient fx-bg-ambient--cyan fx-anim absolute left-0 top-0" />
+      <div className="fx-classic-background fx-bg-ambient fx-bg-ambient--green fx-anim absolute left-0 top-0" />
+      <div className="fx-classic-background fx-bg-ambient fx-bg-ambient--cyan fx-anim absolute left-0 top-0" />
 
       {/* Cursor-following light fields */}
-      <div className="fx-bg-glow fx-bg-glow--green fx-optional absolute left-0 top-0" />
-      <div className="fx-bg-glow fx-bg-glow--cyan fx-optional absolute left-0 top-0" />
+      <div className="fx-classic-background fx-bg-glow fx-bg-glow--green fx-optional absolute left-0 top-0" />
+      <div className="fx-classic-background fx-bg-glow fx-bg-glow--cyan fx-optional absolute left-0 top-0" />
 
       {/* Very faint static scanline texture */}
-      <div className="fx-bg-scanlines fx-optional absolute inset-0" />
+      <div className="fx-classic-background fx-bg-scanlines fx-optional absolute inset-0" />
     </div>
   );
 }

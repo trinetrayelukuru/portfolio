@@ -278,7 +278,7 @@ export const EDUCATION = [
     degree: "B.Tech in Computer Science and Engineering",
     institution: "VIT Vellore",
     specialisation: "Internet of Things (IoT)",
-    duration: "2022 — 2026",
+    duration: "2022 — 2028",
     cgpa: "7.6 / 10",
     focus: ["IoT systems", "AI & machine learning", "Cloud & networking"],
   },
